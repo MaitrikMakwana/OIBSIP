@@ -1,6 +1,6 @@
 # Task 1: Basic Network Scanning with Nmap
 
-**Internship:** Security Analyst Internship — CyBrief Pvt. Ltd.  
+
 **Task Level:** Beginner  
 **Status:** ✅ Completed  
 
