@@ -187,15 +187,7 @@ task1-nmap-scan/
 
 ---
 
-## Demo Video
 
-The demo video covers:
-1. Installing Nmap and verifying the version
-2. Running all 4 scan types on the target machine
-3. Reading and interpreting the output
-4. Explaining the significance of each open port
-
----
 
 ## References
 
@@ -206,4 +198,4 @@ The demo video covers:
 
 ---
 
-*Report prepared by: Maitrik | CyBrief Pvt. Ltd. Security Analyst Internship*
+
